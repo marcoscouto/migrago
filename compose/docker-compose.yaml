@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:17.4-alpine
+    container_name: postgres_migo
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: migo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../sql:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+
+  db_admin:
+    image: adminer:5.0.6
+    container_name: adminer_migo
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DEFAULT_USERNAME: root
+      ADMINER_DEFAULT_PASSWORD: pass
+    depends_on:
+      - db
+    ports:
+      - 9000:8080
+
+volumes:
+  pgdata:

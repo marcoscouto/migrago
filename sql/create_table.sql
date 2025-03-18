@@ -1,0 +1,7 @@
+CREATE TABLE
+	IF NOT EXISTS migo_migrations (
+		version VARCHAR(255) PRIMARY KEY,
+		name VARCHAR(255) UNIQUE NOT NULL,
+		checksum VARCHAR(64) UNIQUE NOT NULL,
+		applied_at TIMESTAMP
+	)
