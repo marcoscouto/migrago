@@ -1,9 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"regexp"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -14,6 +17,17 @@ func main() {
 	}
 
 	versions := make(map[string]bool)
+
+	psqlInfo := "host=localhost port=5432 user=root password=pass dbname=migo sslmode=disable"
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		panic(err)
+	}
 
 	for _, f := range files {
 		// Verificar se todos os arquivos tem o pattern correto (V0_nome.sql)
@@ -48,6 +62,6 @@ func main() {
 		// Executar as migrations
 		// Salvar o resultado da execução das migrations
 	}
-	
+
 	fmt.Println("executed successfully")
 }
