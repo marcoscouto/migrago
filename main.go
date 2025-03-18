@@ -42,10 +42,12 @@ func main() {
 		// if err != nil {
 		// 	panic(err)
 		// }
+
+		// Verificar se a migration já foi executada
+		// Verificar se a migration segue a ordem correta
+		// Executar as migrations
+		// Salvar o resultado da execução das migrations
 	}
 	
-	// Executar as migrations
-	// Salvar o resultado da execução das migrations
-
 	fmt.Println("executed successfully")
 }
