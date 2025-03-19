@@ -8,6 +8,6 @@ VALUES
     ),
     (
         'Jane Doe',
-        'johndoe@email.com',
+        'janedoe@email.com',
         '$2a$12$YonFf5TMKBjH5MamypewbOo2WqP48vMeB77NnVhWIM9O/q7lZUqwC'
     );
