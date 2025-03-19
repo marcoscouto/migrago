@@ -1,4 +1,4 @@
-module github.com/marcoscouto/migo
+module github.com/marcoscouto/migrago
 
 go 1.24.1
 

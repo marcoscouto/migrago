@@ -1,5 +1,5 @@
 CREATE TABLE
-	IF NOT EXISTS migo_migrations (
+	IF NOT EXISTS migrago (
 		version BIGINT PRIMARY KEY,
 		name VARCHAR(255) UNIQUE NOT NULL,
 		checksum VARCHAR(64) NOT NULL,

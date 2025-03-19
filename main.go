@@ -1,4 +1,4 @@
-package main
+package migrago
 
 import (
 	"crypto/sha256"
@@ -25,7 +25,7 @@ func main() {
 	}
 
 	// Conectar ao banco de dados
-	psqlInfo := "host=localhost port=5432 user=root password=pass dbname=migo sslmode=disable"
+	psqlInfo := "host=localhost port=5432 user=root password=pass dbname=migrago sslmode=disable"
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		logger.Fatal(err)
@@ -44,7 +44,7 @@ func main() {
 	defer transaction.Rollback()
 
 	// Buscar as migrations já executadas
-	result, err := transaction.Query("SELECT version, name, checksum, applied_at FROM migo_migrations ORDER BY version DESC")
+	result, err := transaction.Query("SELECT version, name, checksum, applied_at FROM migrago ORDER BY version DESC")
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func main() {
 		checksum := fmt.Sprintf("%x", s)
 
 		// Salvar o resultado da execução das migrations
-		if _, err := transaction.Exec("INSERT INTO migo_migrations (version, name, checksum, applied_at) VALUES ($1, $2, $3, $4)", version, f.Name(), checksum, time.Now().UTC()); err != nil {
+		if _, err := transaction.Exec("INSERT INTO migrago (version, name, checksum, applied_at) VALUES ($1, $2, $3, $4)", version, f.Name(), checksum, time.Now().UTC()); err != nil {
 			logger.Fatal(err)
 		}
 
