@@ -24,7 +24,7 @@ func main() {
 		logger.Fatal(err)
 	}
 
-	versions := make(map[uint64]bool)
+	// Conectar ao banco de dados
 	psqlInfo := "host=localhost port=5432 user=root password=pass dbname=migo sslmode=disable"
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -36,20 +36,22 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	// Criar transação
 	transaction, err := db.Begin()
 	if err != nil {
 		logger.Fatal(err)
 	}
 	defer transaction.Rollback()
 
+	// Buscar as migrations já executadas
 	result, err := transaction.Query("SELECT version, name, checksum, applied_at FROM migo_migrations ORDER BY version DESC")
 	if err != nil {
 		logger.Fatal(err)
 	}
 
+	// Criar um map com as migrations já executadas
 	migrationsExecuted := make(map[uint64]Migration)
 	var expectedMigration uint64
-
 	for result.Next() {
 		var migration Migration
 		err = result.Scan(&migration.Version, &migration.Name, &migration.Checksum, &migration.AppliedAt)
@@ -68,7 +70,9 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	// Definir o pattern dos arquivos de migrations
 	pattern := regexp.MustCompile(`^(\d+)_([a-zA-Z0-9_-]+)\.sql$`)
+	versions := make(map[uint64]bool)
 
 	for _, f := range files {
 		// Verificar se todos os arquivos tem o pattern correto (V0_nome.sql)
@@ -116,9 +120,11 @@ func main() {
 			logger.Fatal(err)
 		}
 
-		// Salvar o resultado da execução das migrations
+		// Criar checksum da migration
 		s := sha256.Sum256(byteContent)
 		checksum := fmt.Sprintf("%x", s)
+
+		// Salvar o resultado da execução das migrations
 		if _, err := transaction.Exec("INSERT INTO migo_migrations (version, name, checksum, applied_at) VALUES ($1, $2, $3, $4)", version, f.Name(), checksum, time.Now().UTC()); err != nil {
 			logger.Fatal(err)
 		}
@@ -126,6 +132,7 @@ func main() {
 		logger.Printf("the migration %s executed successfully\n", f.Name())
 	}
 
+	// Commitar as migrations
 	if err := transaction.Commit(); err != nil {
 		logger.Fatal(err)
 	}
