@@ -10,7 +10,7 @@ type GetVersion struct {
 	BaseProcessor
 }
 
-func NewGetVersion(data data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
+func NewGetVersion(data *data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
 	return &GetVersion{
 		BaseProcessor: BaseProcessor{
 			Data:          data,

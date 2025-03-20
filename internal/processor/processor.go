@@ -9,7 +9,7 @@ type MigrationProcessor interface {
 }
 
 type BaseProcessor struct {
-	Data          data.MigrationProcessorData
+	Data          *data.MigrationProcessorData
 	NextProcessor MigrationProcessor
 }
 

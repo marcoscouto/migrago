@@ -14,7 +14,7 @@ type ExecuteMigration struct {
 	BaseProcessor
 }
 
-func NewExecuteMigration(data data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
+func NewExecuteMigration(data *data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
 	return &ExecuteMigration{
 		BaseProcessor: BaseProcessor{
 			Data:          data,

@@ -10,7 +10,7 @@ type ValidateOrder struct {
 	BaseProcessor
 }
 
-func NewValidateOrder(data data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
+func NewValidateOrder(data *data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
 	return &ValidateOrder{
 		BaseProcessor: BaseProcessor{
 			Data:          data,

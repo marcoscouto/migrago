@@ -1,12 +1,14 @@
 package processor
 
-import "github.com/marcoscouto/migrago/internal/data"
+import (
+	"github.com/marcoscouto/migrago/internal/data"
+)
 
 type VerifyExecuted struct {
 	BaseProcessor
 }
 
-func NewVerifyExecuted(data data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
+func NewVerifyExecuted(data *data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
 	return &VerifyExecuted{
 		BaseProcessor: BaseProcessor{
 			Data:          data,

@@ -10,7 +10,7 @@ type validateDuplication struct {
 	BaseProcessor
 }
 
-func NewValidateDuplication(data data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
+func NewValidateDuplication(data *data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
 	return &validateDuplication{
 		BaseProcessor: BaseProcessor{
 			Data:          data,
@@ -24,5 +24,5 @@ func (v *validateDuplication) Execute() error {
 		return fmt.Errorf("duplicated migration file")
 	}
 	v.Data.UniqueMigrations[v.Data.Version] = true
-	return nil
+	return v.Next()
 }

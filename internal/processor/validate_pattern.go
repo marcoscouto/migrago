@@ -10,7 +10,7 @@ type ValidatePattern struct {
 	BaseProcessor
 }
 
-func NewValidatePattern(data data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
+func NewValidatePattern(data *data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
 	return &ValidatePattern{
 		BaseProcessor: BaseProcessor{
 			Data:          data,

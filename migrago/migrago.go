@@ -21,8 +21,12 @@ type migrago struct {
 }
 
 func New(connection *sql.DB) Migrago {
-	regex := regexp.MustCompile(`^(\d+)_([a-zA-Z0-9_-]+)\.sql$`)
+	const (
+		pattern = `^(\d+)_([a-zA-Z0-9_-]+)\.sql$`
+	)
+	regex := regexp.MustCompile(pattern)
 	uniqueMigrations := make(map[uint64]bool)
+
 	return &migrago{
 		regex:            regex,
 		uniqueMigrations: uniqueMigrations,
@@ -43,7 +47,7 @@ func (m *migrago) ExecuteMigrations(folderPath string) error {
 		}
 
 		for _, f := range files {
-			data := data.MigrationProcessorData{
+			data := &data.MigrationProcessorData{
 				Regex:              m.regex,
 				UniqueMigrations:   m.uniqueMigrations,
 				ExecutedMigrations: executedMigrations,
@@ -62,16 +66,19 @@ func (m *migrago) ExecuteMigrations(folderPath string) error {
 
 			return validatePattern.Execute()
 		}
-
 		return nil
 	})
 }
 
 func getExecutedMigrations(transaction *sql.Tx) (executedMigrations map[uint64]data.Migration, lastMigrationExecuted uint64, err error) {
+	const (
+		query = `SELECT version, name, checksum, applied_at FROM migrago ORDER BY version DESC`
+	)
+
 	executedMigrations = make(map[uint64]data.Migration)
 	lastMigrationExecuted = 0
 
-	result, err := transaction.Query("SELECT version, name, checksum, applied_at FROM migrago ORDER BY version DESC")
+	result, err := transaction.Query(query)
 	if err != nil {
 		return nil, 0, err
 	}
