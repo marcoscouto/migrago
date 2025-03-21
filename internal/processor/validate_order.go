@@ -1,9 +1,8 @@
 package processor
 
 import (
-	"fmt"
-
 	"github.com/marcoscouto/migrago/internal/data"
+	"github.com/marcoscouto/migrago/internal/errors"
 )
 
 type ValidateOrder struct {
@@ -22,7 +21,7 @@ func NewValidateOrder(data *data.MigrationProcessorData, next MigrationProcessor
 func (v *ValidateOrder) Execute() error {
 	*v.Data.LastMigration++
 	if v.Data.Version != *v.Data.LastMigration {
-		return fmt.Errorf("the migration is out of order")
+		return errors.ErrOutOfOrder
 	}
 	return v.Next()
 }

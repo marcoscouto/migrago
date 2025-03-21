@@ -1,9 +1,8 @@
 package processor
 
 import (
-	"fmt"
-
 	"github.com/marcoscouto/migrago/internal/data"
+	"github.com/marcoscouto/migrago/internal/errors"
 )
 
 type validateDuplication struct {
@@ -21,7 +20,7 @@ func NewValidateDuplication(data *data.MigrationProcessorData, next MigrationPro
 
 func (v *validateDuplication) Execute() error {
 	if v.Data.UniqueMigrations[v.Data.Version] {
-		return fmt.Errorf("duplicated migration file")
+		return errors.ErrDuplicatedFile
 	}
 	v.Data.UniqueMigrations[v.Data.Version] = true
 	return v.Next()

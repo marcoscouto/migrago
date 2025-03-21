@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/marcoscouto/migrago"
+	"github.com/marcoscouto/migrago/internal/errors"
 	"github.com/marcoscouto/migrago/test/helpers"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -41,14 +42,17 @@ func (suite *MigrationProcessorTestSuite) SetupSuite() {
 }
 
 func (suite *MigrationProcessorTestSuite) SetupTest() {
-	const database = "postgres"
+	const (
+		database    = "postgres"
+		disabledSSL = "sslmode=disable"
+	)
 
 	connString, err := suite.container.ConnectionString(suite.ctx)
 	if err != nil {
 		suite.T().Fatal(err)
 	}
 
-	db, err := sql.Open(database, fmt.Sprint(connString, "sslmode=disable"))
+	db, err := sql.Open(database, fmt.Sprint(connString, disabledSSL))
 	if err != nil {
 		suite.T().Fatal(err)
 	}
@@ -81,17 +85,17 @@ func (suite *MigrationProcessorTestSuite) TestExecuteSuccessfully() {
 func (suite *MigrationProcessorTestSuite) TestExecutePatternError() {
 	err := suite.migrago.ExecuteMigrations(invalidPatternMigrationsDir)
 	suite.Error(err)
-	suite.Equal("invalid migration filename format", err.Error())
+	suite.Equal(errors.ErrInvalidPattern, err)
 }
 
 func (suite *MigrationProcessorTestSuite) TestExecuteDuplicatedError() {
 	err := suite.migrago.ExecuteMigrations(duplicatedMigrationsDir)
 	suite.Error(err)
-	suite.Equal("duplicated migration file", err.Error())
+	suite.Equal(errors.ErrDuplicatedFile, err)
 }
 
 func (suite *MigrationProcessorTestSuite) TestExecuteOutOfOrderError() {
 	err := suite.migrago.ExecuteMigrations(outOfOrderMigrationsDir)
 	suite.Error(err)
-	suite.Equal("the migration is out of order", err.Error())
+	suite.Equal(errors.ErrOutOfOrder, err)
 }

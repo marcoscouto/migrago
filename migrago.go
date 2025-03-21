@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/marcoscouto/migrago/internal/config"
 	"github.com/marcoscouto/migrago/internal/data"
 	"github.com/marcoscouto/migrago/internal/processor"
 	"github.com/marcoscouto/migrago/internal/transaction"
@@ -15,23 +16,22 @@ type Migrago interface {
 }
 
 type migrago struct {
-	regex            *regexp.Regexp
-	uniqueMigrations map[uint64]bool
 	connection       *sql.DB
+	uniqueMigrations map[uint64]bool
+	defaultRegex     *regexp.Regexp
 }
 
 func New(connection *sql.DB) Migrago {
-	const (
-		pattern = `^(\d+)_([a-zA-Z0-9_-]+)\.sql$`
-	)
-	regex := regexp.MustCompile(pattern)
+	config := config.DefaultConfig()
+	regex := regexp.MustCompile(config.MigrationPattern)
 	uniqueMigrations := make(map[uint64]bool)
 
 	return &migrago{
-		regex:            regex,
+		defaultRegex:     regex,
 		uniqueMigrations: uniqueMigrations,
 		connection:       connection,
 	}
+
 }
 
 func (m *migrago) ExecuteMigrations(folderPath string) error {
@@ -48,7 +48,7 @@ func (m *migrago) ExecuteMigrations(folderPath string) error {
 
 		for _, f := range files {
 			data := &data.MigrationProcessorData{
-				Regex:              m.regex,
+				Regex:              m.defaultRegex,
 				UniqueMigrations:   m.uniqueMigrations,
 				ExecutedMigrations: executedMigrations,
 				FileName:           f.Name(),

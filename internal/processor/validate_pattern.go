@@ -1,9 +1,8 @@
 package processor
 
 import (
-	"fmt"
-
 	"github.com/marcoscouto/migrago/internal/data"
+	"github.com/marcoscouto/migrago/internal/errors"
 )
 
 type ValidatePattern struct {
@@ -22,7 +21,7 @@ func NewValidatePattern(data *data.MigrationProcessorData, next MigrationProcess
 func (v *ValidatePattern) Execute() error {
 	match := v.Data.Regex.Match([]byte(v.Data.FileName))
 	if !match {
-		return fmt.Errorf("invalid migration filename format")
+		return errors.ErrInvalidPattern
 	}
 	return v.Next()
 }
