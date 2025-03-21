@@ -36,6 +36,10 @@ func New(connection *sql.DB) Migrago {
 
 func (m *migrago) ExecuteMigrations(folderPath string) error {
 	return transaction.New(m.connection).Execute(func(tx *sql.Tx) error {
+		if err := createMigrationTable(tx); err != nil {
+			return err
+		}
+
 		executedMigrations, lastMigrationExecuted, err := getExecutedMigrations(tx)
 		if err != nil {
 			return err
@@ -70,6 +74,20 @@ func (m *migrago) ExecuteMigrations(folderPath string) error {
 		}
 		return nil
 	})
+}
+
+func createMigrationTable(transaction *sql.Tx) error {
+	const (
+		query = `CREATE TABLE IF NOT EXISTS migrago (
+		version BIGINT PRIMARY KEY,
+		name VARCHAR(255) UNIQUE NOT NULL,
+		checksum VARCHAR(64) NOT NULL,
+		applied_at TIMESTAMP
+	)`
+	)
+
+	_, err := transaction.Exec(query)
+	return err
 }
 
 func getExecutedMigrations(transaction *sql.Tx) (executedMigrations map[uint64]data.Migration, lastMigrationExecuted uint64, err error) {
