@@ -53,7 +53,7 @@ func (m *migrago) ExecuteMigrations(folderPath string) error {
 				ExecutedMigrations: executedMigrations,
 				FileName:           f.Name(),
 				FolderPath:         folderPath,
-				LastMigration:      lastMigrationExecuted,
+				LastMigration:      &lastMigrationExecuted,
 				DbTx:               tx,
 			}
 
@@ -64,7 +64,9 @@ func (m *migrago) ExecuteMigrations(folderPath string) error {
 			getVersion := processor.NewGetVersion(data, validateDuplication)
 			validatePattern := processor.NewValidatePattern(data, getVersion)
 
-			return validatePattern.Execute()
+			if err := validatePattern.Execute(); err != nil {
+				return err
+			}
 		}
 		return nil
 	})

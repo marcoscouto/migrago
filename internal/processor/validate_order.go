@@ -20,8 +20,8 @@ func NewValidateOrder(data *data.MigrationProcessorData, next MigrationProcessor
 }
 
 func (v *ValidateOrder) Execute() error {
-	v.Data.LastMigration++
-	if v.Data.Version != v.Data.LastMigration {
+	*v.Data.LastMigration++
+	if v.Data.Version != *v.Data.LastMigration {
 		return fmt.Errorf("the migration is out of order")
 	}
 	return v.Next()

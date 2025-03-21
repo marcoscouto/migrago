@@ -12,6 +12,6 @@ type MigrationProcessorData struct {
 	ExecutedMigrations map[uint64]Migration
 	FileName           string
 	FolderPath         string
-	LastMigration      uint64
+	LastMigration      *uint64
 	DbTx               *sql.Tx
 }
