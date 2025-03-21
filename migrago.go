@@ -82,8 +82,7 @@ func createMigrationTable(transaction *sql.Tx) error {
 		version BIGINT PRIMARY KEY,
 		name VARCHAR(255) UNIQUE NOT NULL,
 		checksum VARCHAR(64) NOT NULL,
-		applied_at TIMESTAMP
-	)`
+		applied_at TIMESTAMP)`
 	)
 
 	_, err := transaction.Exec(query)
