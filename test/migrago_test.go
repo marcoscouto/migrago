@@ -8,14 +8,19 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
-	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/marcoscouto/migrago"
+	"github.com/marcoscouto/migrago/test/helpers"
 	"github.com/stretchr/testify/suite"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
+)
+
+const (
+	validMigrationsDir          = "migrations/valid"
+	invalidPatternMigrationsDir = "migrations/invalid_pattern"
+	duplicatedMigrationsDir     = "migrations/duplicated"
+	outOfOrderMigrationsDir     = "migrations/out_of_order"
 )
 
 type MigrationProcessorTestSuite struct {
@@ -28,7 +33,7 @@ type MigrationProcessorTestSuite struct {
 
 func (suite *MigrationProcessorTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
-	container, err := createPostgresContainer(suite.ctx)
+	container, err := helpers.CreatePostgresContainer(suite.ctx, filepath.Join("scripts", "init.sql"))
 	if err != nil {
 		suite.T().Fatal(err)
 	}
@@ -36,9 +41,7 @@ func (suite *MigrationProcessorTestSuite) SetupSuite() {
 }
 
 func (suite *MigrationProcessorTestSuite) SetupTest() {
-	const (
-		database = "postgres"
-	)
+	const database = "postgres"
 
 	connString, err := suite.container.ConnectionString(suite.ctx)
 	if err != nil {
@@ -71,45 +74,24 @@ func TestMigrationProcessorTestSuite(t *testing.T) {
 }
 
 func (suite *MigrationProcessorTestSuite) TestExecuteSuccessfully() {
-	err := suite.migrago.ExecuteMigrations("valid")
+	err := suite.migrago.ExecuteMigrations(validMigrationsDir)
 	suite.NoError(err)
 }
 
 func (suite *MigrationProcessorTestSuite) TestExecutePatternError() {
-	err := suite.migrago.ExecuteMigrations("invalid_pattern")
+	err := suite.migrago.ExecuteMigrations(invalidPatternMigrationsDir)
 	suite.Error(err)
 	suite.Equal("invalid migration filename format", err.Error())
 }
 
 func (suite *MigrationProcessorTestSuite) TestExecuteDuplicatedError() {
-	err := suite.migrago.ExecuteMigrations("duplicated")
+	err := suite.migrago.ExecuteMigrations(duplicatedMigrationsDir)
 	suite.Error(err)
 	suite.Equal("duplicated migration file", err.Error())
 }
 
 func (suite *MigrationProcessorTestSuite) TestExecuteOutOfOrderError() {
-	err := suite.migrago.ExecuteMigrations("out_of_order")
+	err := suite.migrago.ExecuteMigrations(outOfOrderMigrationsDir)
 	suite.Error(err)
 	suite.Equal("the migration is out of order", err.Error())
-}
-
-func createPostgresContainer(ctx context.Context) (*postgres.PostgresContainer, error) {
-	const (
-		image           = "postgres:17.4-alpine"
-		postgreUser     = "root"
-		postgrePassword = "pass"
-		postgreDB       = "migrago"
-	)
-
-	return postgres.Run(ctx,
-		image,
-		postgres.WithDatabase(postgreDB),
-		postgres.WithUsername(postgreUser),
-		postgres.WithPassword(postgrePassword),
-		postgres.WithInitScripts(filepath.Join("init.sql")),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(5*time.Second)),
-	)
 }
