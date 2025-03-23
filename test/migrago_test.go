@@ -62,7 +62,7 @@ func (suite *MigrationProcessorTestSuite) SetupTest() {
 	}
 
 	suite.db = db
-	suite.migrago = migrago.New(db)
+	suite.migrago = migrago.New(db, "postgres")
 }
 
 func (suite *MigrationProcessorTestSuite) TearDownTest() {

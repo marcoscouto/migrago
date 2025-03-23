@@ -8,18 +8,21 @@ import (
 	"time"
 
 	"github.com/marcoscouto/migrago/internal/data"
+	"github.com/marcoscouto/migrago/internal/utils"
 )
 
 type ExecuteMigration struct {
 	BaseProcessor
+	databaseUtils utils.DatabaseUtils
 }
 
-func NewExecuteMigration(data *data.MigrationProcessorData, next MigrationProcessor) MigrationProcessor {
+func NewExecuteMigration(data *data.MigrationProcessorData, next MigrationProcessor, databaseUtils utils.DatabaseUtils) MigrationProcessor {
 	return &ExecuteMigration{
 		BaseProcessor: BaseProcessor{
 			Data:          data,
 			NextProcessor: next,
 		},
+		databaseUtils: databaseUtils,
 	}
 }
 
@@ -34,7 +37,8 @@ func (v *ExecuteMigration) Execute() error {
 		return err
 	}
 
-	if _, err := v.Data.DbTx.Exec("INSERT INTO migrago (version, name, checksum, applied_at) VALUES ($1, $2, $3, $4)", v.Data.Version, v.Data.FileName, buildChecksum(content), time.Now().UTC()); err != nil {
+	sql := v.databaseUtils.BuildSQLStatement("INSERT INTO migrago (version, name, checksum, applied_at) VALUES (%s, %s, %s, %s)")
+	if _, err := v.Data.DbTx.Exec(sql, v.Data.Version, v.Data.FileName, buildChecksum(content), time.Now().UTC()); err != nil {
 		return err
 	}
 
