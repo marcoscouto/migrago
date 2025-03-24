@@ -7,22 +7,22 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/marcoscouto/goql"
 	"github.com/marcoscouto/migrago/internal/data"
-	"github.com/marcoscouto/migrago/internal/utils"
 )
 
 type ExecuteMigration struct {
 	BaseProcessor
-	databaseUtils utils.DatabaseUtils
+	goql goql.GoQL
 }
 
-func NewExecuteMigration(data *data.MigrationProcessorData, next MigrationProcessor, databaseUtils utils.DatabaseUtils) MigrationProcessor {
+func NewExecuteMigration(data *data.MigrationProcessorData, next MigrationProcessor, goql goql.GoQL) MigrationProcessor {
 	return &ExecuteMigration{
 		BaseProcessor: BaseProcessor{
 			Data:          data,
 			NextProcessor: next,
 		},
-		databaseUtils: databaseUtils,
+		goql: goql,
 	}
 }
 
@@ -37,8 +37,8 @@ func (v *ExecuteMigration) Execute() error {
 		return err
 	}
 
-	sql := v.databaseUtils.BuildSQLStatement("INSERT INTO migrago (version, name, checksum, applied_at) VALUES (%s, %s, %s, %s)")
-	if _, err := v.Data.DbTx.Exec(sql, v.Data.Version, v.Data.FileName, buildChecksum(content), time.Now().UTC()); err != nil {
+	sql, args := v.goql.BuildSQLStatement("INSERT INTO migrago (version, name, checksum, applied_at) VALUES (%s, %s, %s, %s)", v.Data.Version, v.Data.FileName, buildChecksum(content), time.Now().UTC())
+	if _, err := v.Data.DbTx.Exec(sql, args...); err != nil {
 		return err
 	}
 

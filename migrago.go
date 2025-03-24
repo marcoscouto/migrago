@@ -5,11 +5,11 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/marcoscouto/goql"
 	"github.com/marcoscouto/migrago/internal/config"
 	"github.com/marcoscouto/migrago/internal/data"
 	"github.com/marcoscouto/migrago/internal/processor"
 	"github.com/marcoscouto/migrago/internal/transaction"
-	"github.com/marcoscouto/migrago/internal/utils"
 )
 
 type Migrago interface {
@@ -20,20 +20,20 @@ type migrago struct {
 	connection       *sql.DB
 	uniqueMigrations map[uint64]bool
 	defaultRegex     *regexp.Regexp
-	databaseUtils utils.DatabaseUtils
+	goql             goql.GoQL
 }
 
 func New(connection *sql.DB, driverName string) Migrago {
 	config := config.DefaultConfig()
 	regex := regexp.MustCompile(config.MigrationPattern)
 	uniqueMigrations := make(map[uint64]bool)
-	databaseUtils := utils.NewDatabaseUtils(driverName)
+	goql := goql.New(driverName)
 
 	return &migrago{
 		defaultRegex:     regex,
 		uniqueMigrations: uniqueMigrations,
 		connection:       connection,
-		databaseUtils: databaseUtils,
+		goql:             goql,
 	}
 
 }
@@ -65,7 +65,7 @@ func (m *migrago) ExecuteMigrations(folderPath string) error {
 				DbTx:               tx,
 			}
 
-			executedMigrations := processor.NewExecuteMigration(data, nil, m.databaseUtils)
+			executedMigrations := processor.NewExecuteMigration(data, nil, m.goql)
 			validateOrder := processor.NewValidateOrder(data, executedMigrations)
 			verifyExecuted := processor.NewVerifyExecuted(data, validateOrder)
 			validateDuplication := processor.NewValidateDuplication(data, verifyExecuted)
